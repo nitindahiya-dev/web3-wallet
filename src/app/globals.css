@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.react-responsive-modal-modal{
+    background: transparent !important;
+}
+
+.react-responsive-modal-closeButton {
+    top: 25px !important;
+    right: 25px !important;
+}
