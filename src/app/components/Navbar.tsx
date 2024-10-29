@@ -4,7 +4,7 @@ import PrimaryButton from '../components/ui/PrimaryButton';
 
 const Navbar = () => {
     return (
-        <div className='absolute flex justify-between px-5 top-0 w-[60vw] bg-white text-black mt-7 py-3 rounded-full '>
+        <div className='absolute flex justify-between px-5 top-0 w-[90vw] md:w-[60vw] bg-white text-black mt-7 py-3 rounded-full '>
             <div className="font-extrabold text-lg">Logo</div>
             <div className="flex gap-5">
                 <Link

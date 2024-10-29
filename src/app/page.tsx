@@ -15,6 +15,8 @@ import { Modal } from 'react-responsive-modal';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { ToastContainer, toast } from 'react-toastify';
+
+
 interface Wallet {
   publicKey: string;
   privateKey: string;
@@ -61,15 +63,15 @@ const Home = () => {
   }, []);
 
   const handleDeleteWallet = (index: number) => {
-    const updatedWallets = wallets.filter((_, i) => i !== index);
-    const updatedPathTypes = pathTypes.filter((_, i) => i !== index);
+    const updatedWallets = wallets.filter((_: unknown, i: number) => i !== index);
+    const updatedPathTypes = pathTypes.filter((_: unknown, i: number) => i !== index);
 
     setWallets(updatedWallets);
     setPathTypes(updatedPathTypes);
     localStorage.setItem("wallets", JSON.stringify(updatedWallets));
     localStorage.setItem("paths", JSON.stringify(updatedPathTypes));
-    setVisiblePrivateKeys(visiblePrivateKeys.filter((_, i) => i !== index));
-    setVisiblePhrases(visiblePhrases.filter((_, i) => i !== index));
+    setVisiblePrivateKeys(visiblePrivateKeys.filter((_: unknown, i: number) => i !== index));
+    setVisiblePhrases(visiblePhrases.filter((_: unknown, i: number) => i !== index));
     toast.success("Wallet deleted successfully!");
 
     CloseDeleteModal();
@@ -96,7 +98,7 @@ const Home = () => {
 
   const togglePrivateKeyVisibility = (index: number) => {
     setVisiblePrivateKeys(
-      visiblePrivateKeys.map((visible, i) => (i === index ? !visible : visible))
+      visiblePrivateKeys.map((visible: boolean, i: number) => (i === index ? !visible : visible))
     );
   };
 
@@ -242,15 +244,15 @@ const Home = () => {
                 }}
                 className="relative flex flex-col gap-4  px-4"
               >
-                <div className="text-2xl md:text-5xl mb-10 font-bold text-white">
+                <div className="text-2xl md:text-5xl md:mb-10 font-bold text-white">
                   <span className="bg-blue-600">Secret Recovery Phrase</span>
                   <p className="mt-4">Save these words in a safe place</p>
                 </div>
-                <div className="flex gap-5 w-[80vw] h-12">
+                <div className="flex flex-col  items-center md:flex-row gap-5 md:w-[80vw] h-12">
                   <input
                     type="text"
                     placeholder="Enter your secret phrase (or leave empty to generate wallet)"
-                    className="whitespace-nowrap text-md font-bold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 shadow px-4 py-2 w-[40vw] h-12 gap-0.5 inline-flex items-center justify-center rounded-full hover:bg-dark-4 placeholder:text-black placeholder:font-bold"
+                    className="whitespace-nowrap text-md font-bold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 shadow px-4 py-2 w-full md:w-[40vw] h-12 gap-0.5 inline-flex items-center justify-center rounded-full hover:bg-dark-4 placeholder:text-black placeholder:font-bold"
                     onChange={(e) => setMnemonicInput(e.target.value)}
                     value={mnemonicInput}
                   />
@@ -314,7 +316,7 @@ const Home = () => {
                     duration: 0.3,
                     ease: "easeInOut",
                   }}
-                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 justify-center w-full items-center mx-auto my-8"
+                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 justify-center w-full items-center mx-auto my-4 md:my-8"
                 >
                   {mnemonicWords.map((word, index) => (
                     <p
@@ -365,7 +367,7 @@ const Home = () => {
                   Clear Wallets
                 </button>
                 <Modal open={open} onClose={onCloseModal} center>
-                  <div className="p-8 bg-white rounded-2xl w-[30vw] text-center">
+                  <div className="md:p-8 p-4 bg-white rounded-2xl md:w-[30vw] text-center">
                     <h2 className="text-2xl font-semibold mb-4">
                       Are you sure you want to delete all wallets?
                     </h2>
@@ -391,8 +393,8 @@ const Home = () => {
                 </Modal>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-8 h-[50vh] py-5 px-10 overflow-y-scroll w-[80vw]"  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }} >
-            {wallets.map((wallet, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-[50vh] md:py-5 md:px-10 overflow-y-scroll w-[80vw]"  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }} >
+            {wallets.map((wallet: Wallet, index: number) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: -20 }}
@@ -402,7 +404,7 @@ const Home = () => {
                   duration: 0.3,
                   ease: "easeInOut",
                 }}
-                className="flex flex-col gap-8 px-8 py-4 rounded-2xl border-[2px] border-dashed"
+                className="flex flex-col gap-8 px-8 py-4 rounded-2xl h-min border-[2px] border-dashed"
               >
                 <div className="flex justify-between">
                   <h3 className="text-white text-2xl font-bold">Wallet {index + 1}</h3>
@@ -426,7 +428,7 @@ const Home = () => {
                     </svg>
                   </button>
                   <Modal open={openDel} onClose={CloseDeleteModal} center>
-                    <div className="p-8 bg-white rounded-2xl w-[30vw] text-center">
+                    <div className="md:p-8 p-4  bg-white rounded-2xl md:w-[30vw] text-center">
                       <h2 className="text-2xl font-semibold mb-4">
                         Are you sure you want to delete this wallet?
                       </h2>
