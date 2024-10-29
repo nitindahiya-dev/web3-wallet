@@ -12,14 +12,15 @@ import Navbar from "./components/Navbar";
 import PrimaryButton from "./components/ui/PrimaryButton";
 import 'react-responsive-modal/styles.css';
 import { Modal } from 'react-responsive-modal';
+import 'react-toastify/dist/ReactToastify.css';
 
+import { ToastContainer, toast } from 'react-toastify';
 interface Wallet {
   publicKey: string;
   privateKey: string;
   mnemonic: string;
   path: string;
 }
-
 
 const Home = () => {
   const [mnemonicWords, setMnemonicWords] = useState<string[]>(Array(12).fill(" "));
@@ -32,15 +33,15 @@ const Home = () => {
   const [open, setOpen] = useState(false);
   const [openDel, setOpenDel] = useState(false);
   const pathTypeNames: { [key: string]: string } = {
-    "501": "solana",
+    "501": "Solana",
     "60": "Ethereum",
-  }
+  };
 
-  const onOpenModal = () => setOpen(true);
-  const onCloseModal = () => setOpen(false);
+  const onOpenModal = () => {setOpen(true)};
+  const onCloseModal = () => {setOpen(false)};
 
-  const openDeleteModal = () => setOpenDel(true);
-  const CloseDeleteModal = () => setOpenDel(false);
+  const openDeleteModal = () => {setOpenDel(true)};
+  const CloseDeleteModal = () => {setOpenDel(false)};
 
   const pathTypeName = pathTypeNames[pathTypes[0]] || "";
 
@@ -59,7 +60,6 @@ const Home = () => {
     }
   }, []);
 
-
   const handleDeleteWallet = (index: number) => {
     const updatedWallets = wallets.filter((_, i) => i !== index);
     const updatedPathTypes = pathTypes.filter((_, i) => i !== index);
@@ -70,7 +70,9 @@ const Home = () => {
     localStorage.setItem("paths", JSON.stringify(updatedPathTypes));
     setVisiblePrivateKeys(visiblePrivateKeys.filter((_, i) => i !== index));
     setVisiblePhrases(visiblePhrases.filter((_, i) => i !== index));
-    console.log("Wallet deleted successfully!");
+    toast.success("Wallet deleted successfully!");
+
+    CloseDeleteModal();
   };
 
   const handleClearWallets = () => {
@@ -82,12 +84,14 @@ const Home = () => {
     setPathTypes([]);
     setVisiblePrivateKeys([]);
     setVisiblePhrases([]);
-    console.log("All wallets cleared.");
+    toast.success("All wallets cleared.");
+
+    onCloseModal();
   };
 
   const copyToClipboard = (content: string) => {
     navigator.clipboard.writeText(content);
-    console.log("Copied to clipboard!");
+    toast.success("Copied to clipboard!");
   };
 
   const togglePrivateKeyVisibility = (index: number) => {
@@ -96,113 +100,90 @@ const Home = () => {
     );
   };
 
-    // const togglePhraseVisibility = (index: number) => {
-    //   setVisiblePhrases(
-    //     visiblePhrases.map((visible, i) => (i === index ? !visible : visible))
-    //   );
-    // };
+  const handleGenerateWallet = () => {
+    let mnemonic = mnemonicInput.trim();
 
-
-    const generateWalletFromMnemonic = (
-      pathType: string,
-      mnemonic: string,
-      accountIndex: number
-    ): Wallet | null => {
-      try {
-        const seedBuffer = mnemonicToSeedSync(mnemonic);
-        const path = `m/44'/${pathType}'/0'/${accountIndex}'`;
-        const { key: derivedSeed } = derivePath(path, seedBuffer.toString("hex"));
-  
-        let publicKeyEncoded: string;
-        let privateKeyEncoded: string;
-  
-        if (pathType === "501") {
-          // Solana
-          const { secretKey } = nacl.sign.keyPair.fromSeed(derivedSeed);
-          const keypair = Keypair.fromSecretKey(secretKey);
-          privateKeyEncoded = bs58.encode(secretKey);
-          publicKeyEncoded = keypair.publicKey.toBase58();
-        } else if (pathType === "60" || pathType === "56") {
-          // Ethereum
-          const privateKey = Buffer.from(derivedSeed).toString("hex");
-          privateKeyEncoded = privateKey;
-          const wallet = new ethers.Wallet(privateKey);
-          publicKeyEncoded = wallet.address;
-        } else {
-          console.log("Unsupported path type.");
-          return null;
-        }
-  
-        return {
-          publicKey: publicKeyEncoded,
-          privateKey: privateKeyEncoded,
-          mnemonic,
-          path,
-        };
-      } catch (error) {
-        console.log("Failed to generate wallet. Please try again.");
-        return null;
-      }
-    };
-
-    const handleGenerateWallet = () => {
-      let mnemonic = mnemonicInput.trim();
-  
-      if (mnemonic) {
-        if (!validateMnemonic(mnemonic)) {
-          console.log("Invalid recovery phrase. Please try again.");
-          return;
-        }
-      } else {
-        mnemonic = generateMnemonic();
-      }
-  
-      const words = mnemonic.split(" ");
-      setMnemonicWords(words);
-  
-      const wallet = generateWalletFromMnemonic(
-        pathTypes[0],
-        mnemonic,
-        wallets.length
-      );
-      if (wallet) {
-        const updatedWallets = [...wallets, wallet];
-        setWallets(updatedWallets);
-        localStorage.setItem("wallets", JSON.stringify(updatedWallets));
-        localStorage.setItem("mnemonics", JSON.stringify(words));
-        localStorage.setItem("paths", JSON.stringify(pathTypes));
-        setVisiblePrivateKeys([...visiblePrivateKeys, false]);
-        setVisiblePhrases([...visiblePhrases, false]);
-        console.log("Wallet generated successfully!");
-      }
-    };
-
-
-
-    const handleAddWallet = () => {
-      if (!mnemonicWords) {
-        console.log("No mnemonic found. Please generate a wallet first.");
+    if (mnemonic) {
+      if (!validateMnemonic(mnemonic)) {
+        toast.error("Invalid recovery phrase. Please try again.");
         return;
       }
-  
-      const wallet = generateWalletFromMnemonic(
-        pathTypes[0],
-        mnemonicWords.join(" "),
-        wallets.length
-      );
-      if (wallet) {
-        const updatedWallets = [...wallets, wallet];
-        const updatedPathType = [pathTypes, pathTypes];
-        setWallets(updatedWallets);
-        localStorage.setItem("wallets", JSON.stringify(updatedWallets));
-        localStorage.setItem("pathTypes", JSON.stringify(updatedPathType));
-        setVisiblePrivateKeys([...visiblePrivateKeys, false]);
-        setVisiblePhrases([...visiblePhrases, false]);
-        console.log("Wallet generated successfully!");
+    } else {
+      mnemonic = generateMnemonic();
+    }
+
+    const words = mnemonic.split(" ");
+    setMnemonicWords(words);
+
+    const wallet = generateWalletFromMnemonic(pathTypes[0], mnemonic, wallets.length);
+    if (wallet) {
+      const updatedWallets = [...wallets, wallet];
+      setWallets(updatedWallets);
+      localStorage.setItem("wallets", JSON.stringify(updatedWallets));
+      localStorage.setItem("mnemonics", JSON.stringify(words));
+      localStorage.setItem("paths", JSON.stringify(pathTypes));
+      setVisiblePrivateKeys([...visiblePrivateKeys, false]);
+      setVisiblePhrases([...visiblePhrases, false]);
+      toast.success("Wallet generated successfully!");
+    }
+  };
+
+  const handleAddWallet = () => {
+    if (!mnemonicWords) {
+      toast.error("No mnemonic found. Please generate a wallet first.");
+      return;
+    }
+
+    const wallet = generateWalletFromMnemonic(pathTypes[0], mnemonicWords.join(" "), wallets.length);
+    if (wallet) {
+      const updatedWallets = [...wallets, wallet];
+      const updatedPathType = [pathTypes, pathTypes];
+      setWallets(updatedWallets);
+      localStorage.setItem("wallets", JSON.stringify(updatedWallets));
+      localStorage.setItem("pathTypes", JSON.stringify(updatedPathType));
+      setVisiblePrivateKeys([...visiblePrivateKeys, false]);
+      setVisiblePhrases([...visiblePhrases, false]);
+      toast.success("Wallet generated successfully!");
+    }
+  };
+
+  const generateWalletFromMnemonic = (pathType: string, mnemonic: string, accountIndex: number): Wallet | null => {
+    try {
+      const seedBuffer = mnemonicToSeedSync(mnemonic);
+      const path = `m/44'/${pathType}'/0'/${accountIndex}'`;
+      const { key: derivedSeed } = derivePath(path, seedBuffer.toString("hex"));
+
+      let publicKeyEncoded: string;
+      let privateKeyEncoded: string;
+
+      if (pathType === "501") {
+        // Solana
+        const { secretKey } = nacl.sign.keyPair.fromSeed(derivedSeed);
+        const keypair = Keypair.fromSecretKey(secretKey);
+        privateKeyEncoded = bs58.encode(secretKey);
+        publicKeyEncoded = keypair.publicKey.toBase58();
+      } else if (pathType === "60" || pathType === "56") {
+        // Ethereum
+        const privateKey = Buffer.from(derivedSeed).toString("hex");
+        privateKeyEncoded = privateKey;
+        const wallet = new ethers.Wallet(privateKey);
+        publicKeyEncoded = wallet.address;
+      } else {
+        toast.error("Unsupported path type.");
+        return null;
       }
-    };
 
-
+      return {
+        publicKey: publicKeyEncoded,
+        privateKey: privateKeyEncoded,
+        mnemonic,
+        path,
+      };
+    } catch {
+      toast.error("Failed to generate wallet. Please try again.");
+      return null;
+    }
+  };
 
   return (
     <AuroraBackground>
@@ -410,6 +391,7 @@ const Home = () => {
                 </Modal>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-8 h-[50vh] py-5 px-10 overflow-y-scroll w-[80vw]"  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }} >
             {wallets.map((wallet, index) => (
               <motion.div
                 key={index}
@@ -471,16 +453,16 @@ const Home = () => {
                 <div className="text-white">
                   <div className="mb-6" onClick={() => copyToClipboard(wallet.publicKey)}>
                     <p className="text-xl font-bold">Public Key</p>
-                    <span>{wallet.publicKey}</span>
+                    <span className="cursor-pointer">{wallet.publicKey}</span>
                   </div>
                   <div>
                     <p className="text-xl font-bold">Private Key</p>
                     <div className="flex justify-between">
-                      <span onClick={() => copyToClipboard(wallet.privateKey)}>
+                      <span className="overflow-hidden w-[20vw] cursor-pointer" onClick={() => copyToClipboard(wallet.privateKey)}>
                         {visiblePrivateKeys[index]
                           ? wallet.privateKey
                           : "•".repeat(wallet.mnemonic.length)}</span>
-                      <div>
+                      <div onClick={() => togglePrivateKeyVisibility(index)}>
                         {visiblePrivateKeys[index] ? (
                           <button>
                             <svg
@@ -529,8 +511,10 @@ const Home = () => {
                 </div>
               </motion.div>
             ))}
+            </div>
           </motion.div>
         )}
+        <ToastContainer />
       </div>
     </AuroraBackground>
   );
