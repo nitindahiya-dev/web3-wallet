@@ -257,7 +257,7 @@ const Home = () => {
                     value={mnemonicInput}
                   />
                   <button
-                    className="border-white border-[1px] text-white rounded-full w-52 hover:bg-white hover:text-black font-bold"
+                    className="border-white h-12 border-[1px] text-white rounded-full w-52 hover:bg-white hover:text-black font-bold"
                     onClick={() => handleGenerateWallet()}>
                     {mnemonicInput ? "Add Wallet" : "Generate Wallet"}
                   </button>
