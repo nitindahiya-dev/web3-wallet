@@ -4,7 +4,7 @@ import React from 'react';
 
 const Navbar = () => {
     return (
-        <div className='absolute flex justify-between px-5 top-0 w-[90vw] md:w-[60vw] bg-white text-black mt-7 py-3 rounded-full '>
+        <div className='absolute flex justify-between px-5 top-0 w-[90vw] md:w-[60vw] bg-white text-black mt-7 py-3 rounded-full items-center '>
             <div className="font-extrabold text-lg">Web3 Wallet</div>
             <div className="flex gap-5">
                 <Link
